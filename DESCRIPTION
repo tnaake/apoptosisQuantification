@@ -1,0 +1,32 @@
+Title: Assessment of apoptosis and necroptosus unsing proteomics
+Package: apoptosisQuantification
+Version: 0.99.0
+Date: 2022-01-26
+Authors@R: c(person("Thomas", "Naake", role = c("aut", "cre"), 
+		email = "thomasnaake@googlemail.com",
+		comment = c(ORCID = "0000-0001-7917-5580")))
+VignetteBuilder: knitr
+Description: 
+	The package quantifies the effect of apoptosis and necroptosis using 
+	known markers. The markers are taken from the publication of 
+	Tanzer et al. (2020): Quantitative and Dynamic Catalogs of Proteins 
+	Released during Apoptotic and Necroptotic Cell Death. 
+Depends:
+	dplyr (>= 1.0.7),
+	ggplot2 (>= 3.3.5),
+	methods (>= 4.1.0),
+	R (>= 4.1.0),
+	stats (>= 4.1.0),
+	tibble (>= 3.1.6)
+Imports:
+	MatrixQCvis (>= 1.3.2),
+	SummarizedExperiment (>= 1.24.0)
+Suggests:
+	BiocGenerics (>= 0.37.4),
+	BiocStyle (>= 2.19.2),
+	knitr (>= 1.33),
+	testthat (>= 3.0.2)
+biocViews: Proteomics, QA, QC
+License: GPL (>= 3)
+Encoding: UTF-8
+RoxygenNote: 7.1.2
