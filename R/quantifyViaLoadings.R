@@ -51,7 +51,6 @@
 #' ## "nectroptosis"
 #' markers <- readMarkers(type = "necroptosis")
 #' getLoadingsOfMarkers(prot = prot, markers = markers)
-#' 
 getLoadingsOfMarkers <- function(prot, markers) {
     
     if (!methods::is(markers, "tbl"))
@@ -66,7 +65,7 @@ getLoadingsOfMarkers <- function(prot, markers) {
     
     ## expand markers, some of the features are separated by ";", 
     ## split the strings and replicate the entries
-    markers_protein <- splitNames(markers$protein)#strsplit(markers$protein, split = ";")
+    markers_protein <- splitNames(markers$protein, na.rm = FALSE)#strsplit(markers$protein, split = ";")
     markers_protein_len <- unlist(lapply(markers_protein, length))
     markers <- tibble::tibble(protein = unlist(markers_protein),
         fold_change = rep(markers$fold_change, times = markers_protein_len),
@@ -116,13 +115,22 @@ getLoadingsOfMarkers <- function(prot, markers) {
 #' @title Split the names when separated by ;
 #' 
 #' @description
-#'  
-#' @details 
+#' The function \code{splitNames} creates a ";"-separated list of protein names. 
+#' If \code{na.rm = TRUE}, the \code{NA} values within the protein names 
+#' are removed. \code{NA} values might occur if protein names are translated
+#' from one id to the other, e.g. from SYMBOL to Ensembl.
+#' 
+#' @details
+#' Helper function for various functions in the \code{apoptosisQuantification}
+#' package.
 #' 
 #' @param protein_names character
 #' @param na.rm logical(1)
 #' 
 #' @examples
+#' protein_names <- c("prot_1;prot_2;NA")
+#' splitNames(protein_names = protein_names, na.rm = FALSE)
+#' splitNames(protein_names = protein_names, na.rm = TRUE)
 splitNames <- function(protein_names, na.rm = TRUE) {
     
     ## split the protein names
@@ -193,9 +201,7 @@ splitNames <- function(protein_names, na.rm = TRUE) {
 #' f <- system.file("protein_datasets/tanzer2020.RDS", 
 #'     package = "apoptosisQuantification")
 #' se <- readRDS(f)
-#' prot <- assay(se) |> 
-#'     transformAssay(method = "vsn") |> 
-#'     imputeAssay(method = "MinDet")
+#' prot <- assay(se)
 #' loadings <- prcomp(t(prot))$rotation |> 
 #'     as.data.frame() |>
 #'     rownames_to_column(var = "protein") |> 
@@ -297,9 +303,7 @@ createLoadingsTbl <- function(vals_markers = vals_markers, vals_all = vals_all) 
     ## split the marker proteins
     markers_proteins <- unlist(strsplit(names(vals_markers), split = ";"))
 
-    all_proteins <- splitNames(protein_names = names(vals_all), na.rm = TRUE)#, split = ";")
-    #all_proteins <- lapply(all_proteins, 
-    #    function (proteins) proteins[proteins != "NA"])
+    all_proteins <- splitNames(protein_names = names(vals_all), na.rm = TRUE)
     ind_markers <- unlist(lapply(all_proteins, 
             function (proteins) any(proteins %in% markers_proteins)))
 
@@ -418,7 +422,7 @@ plotECDF <- function(tbl) {
 #' prot <- assay(se) |> 
 #'     transformAssay(method = "vsn") |> 
 #'     imputeAssay(method = "MinDet")
-#' markers <- readMarkers(type = "apoptosis")
+#' markers <- readMarkers(type = "apoptosis", fc = 2, n = 1)
 #'     
 #' ## get loadings of markers and of the complete data set
 #' loadings_markers <- getLoadingsOfMarkers(prot = prot, markers = markers)
@@ -429,16 +433,16 @@ plotECDF <- function(tbl) {
 #' 
 #' ## Tanzer et al. (2020)
 #' ## source: https://www.ebi.ac.uk/pride/archive/projects/PXD014966
-#' f <- system.file("protein_datasets/tanzer2020.RDS", 
+#' f <- system.file("protein_datasets/tanzer2020.RDS",
 #'     package = "apoptosisQuantification")
 #' tanzer2020 <- readRDS(f)
 #' 
 #' ## get loadings of markers and of the complete data set
 #' prot <- assay(tanzer2020)
-#' markers <- readMarkers(type = "apoptosis")
+#' markers <- readMarkers(type = "apoptosis", fc = 2, n = 1)
 #' loadings_markers <- getLoadingsOfMarkers(prot = prot, markers = markers)
-#' vals_all <- prcomp(t(prot))$rotation[, 1]
-#' vals_markers <- setNames(loadings_markers$PC1, loadings_markers$protein)
+#' vals_all <- prcomp(t(prot))$rotation[, 2]
+#' vals_markers <- setNames(loadings_markers$PC2, loadings_markers$protein)
 #' tbl <- createLoadingsTbl(vals_markers = vals_markers, vals_all = vals_all)
 #' 
 #' plotHistogram(tbl)
@@ -493,22 +497,6 @@ plotHistogram <- function(tbl) {
 #' @examples 
 #' library(MatrixQCvis)
 #' library(SummarizedExperiment)
-#' 
-#' ## proteomics example data
-#' f <- system.file("protein_datasets/proteomics_example.RDS", 
-#'     package = "apoptosisQuantification")
-#' se <- readRDS(f)
-#' prot <- assay(se) |> 
-#'     transformAssay(method = "vsn") |> 
-#'     imputeAssay(method = "MinDet")
-#' markers <- readMarkers(type = "apoptosis")
-#'     
-#' ## get loadings of markers and of the complete data set
-#' loadings_markers <- getLoadingsOfMarkers(prot = prot, markers = markers)
-#' vals_all <- prcomp(t(prot))$rotation[, 1]
-#' vals_markers <- setNames(loadings_markers$PC1, loadings_markers$protein)
-#' tbl <- createLoadingsTbl(vals_markers = vals_markers, vals_all = vals_all)
-#' performWilcoxonTest(tbl)
 #' 
 #' ## Tanzer et al. (2020)
 #' ## source: https://www.ebi.ac.uk/pride/archive/projects/PXD014966
