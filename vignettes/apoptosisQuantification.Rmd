@@ -1,0 +1,123 @@
+---
+title: "apoptosisQuantification: Assessment of apoptosis and necroptosis using proteomics"
+author:
+ - name: Thomas Naake
+   mail: thomas.naake@embl.de, thomasnaake@googlemail.com
+   affiliation: European Molecular Biology Laboratory, Meyerhofstrasse 1, 69117 Heidelberg
+package: apoptosisQuantification
+      
+output:  
+    BiocStyle::html_document:
+        toc_float: true
+bibliography: apoptosisQuantification-citations.bib
+vignette: >
+    %\VignetteIndexEntry{Assessment of apoptosis and necroptosis using proteomics"}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteKeywords{Mass Spectrometry, MS, Proteomics, QC, QA}
+    %\VignettePackage{apoptosisQuantification-vignette}
+    %\VignetteEncoding{UTF-8}
+---
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+```
+
+```{r env, include=FALSE, echo=FALSE, cache=FALSE}
+library("knitr")
+opts_chunk$set(stop_on_error = 1L)
+suppressPackageStartupMessages(library("apoptosisQuantification"))
+```
+
+# Questions and bugs {-}
+
+`apoptosisQuantification` is currently under active development. If you
+discover any bugs, typos or develop ideas of improving
+`apoptosisQuantification` feel free to raise an issue via
+[GitHub](https://github.com/tnaake/apoptosisQuantification) or
+send a mail to the developer.
+
+# Prepare the environment and load the data {#sec-prepare}
+To install `apoptosisQuantification` enter the following to the `R` console
+
+```{r install, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+if (!requireNamespace("devtools", quietly = TRUE))
+    BiocManager::install("devtools")
+devtools::install("tnaake/apoptosisQuantification")
+```
+
+# Introduction {#sec-intro}
+
+When performing cell line experiments it is of outermost interest to capture
+variation originating from the treatment, while controlling external 
+effects. One such effect is the onset of apoptosis that results in cell death
+and might overlay the biological effects of interest.
+
+We present here the `apoptosisQuantification` package that allows to quantify
+the level and effects of apoptosis (and necroptosis). We use here a list of
+markers that are deregulated in apoptosis and necroptosis.
+
+Classical necrotic markers include lactate deydrogenase (LDH),high-mobility 
+group B1 (HMGB1), myoglobin, enolase, and 14-3-3 proteins. Commonly, a 
+protein release is observed during apoptosis and necroptosis for human
+myeloid/lymphoma cell lines and human primary macrophage cells as
+observed time course experiments (cf. @Tanzer2020). The work of @Tanzer2020
+looked at differential expression of proteins during a time-course experiments
+where histiocytic lympoma cell lines (U937) were induced to apoptosis 
+(TNF+SM treatment, 
+SM: birinapant, TNF: tumor necrosis factor) 
+and necroptosis (TNF+SM+Idun-6556, Idun-6556: caspase inhibitor IDUN-6556).
+
+# Load marker proteins
+
+The `readMarkers` function loads a list of apoptosis or necroptosis markers 
+taken from the time-course experiment of @Tanzer2020.
+
+We first load a `tibble` that stores the marker proteins together with the 
+observed maximum absolute fold change for significant time points and the 
+number of time points when the difference between treated and control cell lines
+were significant.
+
+```{r read_markers}
+markers_apoptosis <- readMarkers(type = "apoptosis", fc = 2, n = 1)
+markers_necroptosis <- readMarkers(type = "necroptosis", fc = 2, n = 1)
+```
+
+The returned `tibble` contains three columns:
+
+ - `protein`: name of the marker, 
+ - `fold_change`: maximum/minimum fold change from the time-course experiment 
+    (absolute value is taken to define the maximum change), 
+ - `significant_n`: number of significant time-points.
+
+
+# Assessing apoptosis and necroptosis via loadings
+
+This approach looks at the distribution of the loadings (from PCA) from markers
+and non-markers. If there are effects between the different samples caused
+by apoptosis/necroptosis we expect that the distribution of marker loadings
+is higher than the distribution of non-marker loadings.
+
+```{r}
+
+```
+
+# Assessing apoptosis and necroptosis via mitochondrial protein quantification
+
+# Assessing apoptosis and necroptosis via decoupleR
+
+
+
+# Appendix {-}
+
+## Session information {-}
+
+All software and respective versions to build this vignette are listed here:
+
+```{r session,eval=TRUE, echo=FALSE}
+sessionInfo()
+```
+
+## References
+
