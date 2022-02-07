@@ -4,18 +4,18 @@
 \alias{readMarkers}
 \title{Load a file with known markers linked to apoptosis or necroptosis}
 \usage{
-readMarkers(type = c("apoptosis", "necroptosis"), fc = 1, n = 2)
+readMarkers(type = c("apoptosis", "necroptosis"), fc = 2, n = 1)
 }
 \arguments{
 \item{type}{character, \code{"apoptosis"} or \code{"necroptosis"}}
 
-\item{fc}{numeric(1), threshold for fold change (default 1), e.g. if set to
-1, the proteins are retained that have absolute fold changes greater or equal
+\item{fc}{numeric(1), threshold for fold change (default 2), e.g. if set to
+2, the proteins are retained that have absolute fold changes greater or equal
 to \code{fc}}
 
 \item{n}{numeric, threshold for number of significant time points
-(default 2), e.g. if set to 2, the proteins are retained that have at 
-least 2 significant time points}
+(default 1), e.g. if set to 1, the proteins are retained that have at 
+least 1 significant time point}
 }
 \value{
 tibble
@@ -54,13 +54,17 @@ used:
     \item TNF+SM application: inducton of apptosis,
     \item TNF+SM+IDN-6556 application: induction of necroptosis.
 }
+
+The time points 1 h, 3 h, 5 h, and 7 h are taken into account for defining
+the markers. For apoptosis, the time points 9 h, 12.5 h and 15 h are 
+removed prior to filtering the data set.
 }
 \examples{
 ## "apoptosis"
-readMarkers(type = "apoptosis")
+readMarkers(type = "apoptosis", fc = 2, n = 1)
 
 ## "nectroptosis"
-readMarkers(type = "necroptosis")
+readMarkers(type = "necroptosis", fc = 2, n = 2)
 }
 \references{
 Tanzer et al. (2020): Quantitative and Dynamic Catalogs of Proteins 
