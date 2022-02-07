@@ -10,9 +10,16 @@
 #' plasmaContamination package 
 #' (https://github.com/saezlab/plasmaContamination/).
 #' 
-#' @param df data.frame with row names as gene symbols, and then each column
-#' should be a sample or the t-values of a differential analysis
+#' The parameter \code{values} has to have (gene) symbols as \code{row.names}.
+#' \code{values} can be either a numeric \code{vector}, \code{matrix}, or 
+#' \code{data.frame}. It can hold the normalized 
 #' 
+#' @param values numeric \code{vector}, \code{matrix}, or \code{data.frame}
+#' @param contamination \code{character(1)}, either \code{"apoptosis"} or 
+#' \code{"necroptosis"}
+#' @param ... further arguments passed to \code{readMarkers}
+#'  
+#' @importFrom stats na.omit
 #' @importFrom decoupleR decouple
 #' 
 #' @export
@@ -35,16 +42,9 @@
 #' prot <- assay(tanzer2020)
 #'
 #' ## use the intensities to calculate scores
-#' scoreSamples(prot = prot, contamination = "apoptosis", n_perm = 100)
-#' 
-#' ## use the (modified) loadings vector to calculate scores
-#' loadings <- prcomp(t(prot))$rotation |> 
-#'     as.data.frame()
-#' scoreSamples(prot = loadings, contamination = "apoptosis", n_perm = 100)
-#'     
-#' 
-scoreSamples <- function(prot, contamination = c("apoptosis", "necroptosis"),
-    signatures = markers, ...) {
+#' scoreSamples(values = prot, contamination = "apoptosis", n_perm = 100)
+scoreSamples <- function(values, contamination = c("apoptosis", "necroptosis"),
+    ...) {
 
     ## match the contamination argument
     contamination <- match.arg(contamination)
@@ -52,28 +52,30 @@ scoreSamples <- function(prot, contamination = c("apoptosis", "necroptosis"),
     ## obtain the contamination (apoptoss, necroptosis) markers and prepare the
     ## object for decoupleR
     args_fct <- list(...)
-    args_fct[["contamination"]] <- contamination
+    args_fct[["type"]] <- contamination
 
     ## match the arguments ... with the arguments of readMarkers
     args <- args_fct[names(args_fct) %in% names(formals("readMarkers"))]
-    signatures <- do.call("readMarkers", args)
-    signatures <- tibble::add_column(signatures, likelihood = 1, 
-        set = contamination, mor = signatures$fold_change)
+    if (!("signatures" %in% names(args_fct))) {
+        args_fct[["signatures"]] <- do.call("readMarkers", args)
+    }
+    signatures <- tibble::add_column(args_fct[["signatures"]], likelihood = 1, 
+        set = contamination, mor = args_fct[["signatures"]]$fold_change)
 
-    if (is.vector(prot)) {
-        prot <- prot |> 
+    if (is.vector(values)) {
+        values <- values |> 
             as.data.frame()
-        colnames(prot) <- "sample"
+        colnames(values) <- "sample"
     }
 
     ## z-scale
     if ("scale" %in% names(args_fct))
         if (args_fct[["scale"]]) 
-            prot <- scale(prot)
+            values <- scale(values)
 
     ## fix multiple assignments: if there are multiple assignments write only
     ## one marker protein as prot_names
-    prot_names <- splitNames(protein_names = rownames(prot), na.rm = TRUE)
+    prot_names <- splitNames(protein_names = rownames(values), na.rm = TRUE)
     ind_markers <- lapply(prot_names, 
         function(prot_names_i) prot_names_i %in% signatures$protein)
     prot_names <- lapply(seq_along(prot_names),
@@ -84,9 +86,11 @@ scoreSamples <- function(prot, contamination = c("apoptosis", "necroptosis"),
     })
     prot_names <- unlist(prot_names)
 
-    ## convert the matrix to a data.frame
-    prot <- prot |> as.data.frame()
-    rownames(prot) <- prot_names
+    ## convert the matrix to a data.frame, remove duplicated entries
+    values <- values |> as.data.frame()
+    prot_names_rem <- prot_names[!duplicated(prot_names)]
+    values <- values[!duplicated(prot_names), ]
+    rownames(values) <- prot_names_rem
 
     ## create an empty list to store the results
     score_list <- list()
@@ -95,14 +99,14 @@ scoreSamples <- function(prot, contamination = c("apoptosis", "necroptosis"),
     if (!("n_perm" %in% names(args_fct))) 
         args_fct[["n_perm"]] <- 1000
 
-    for(i in seq_len(ncol(prot))) {
-        sub_prot <- prot |>
+    for(i in seq_len(ncol(values))) {
+        sub_values <- values |>
             dplyr::select(all_of(i)) |> 
-            na.omit()
-        sub_prot$decouplerIsGreat <- sub_prot[, 1]
+            stats::na.omit()
+        sub_values$decouplerIsGreat <- sub_values[, 1]
 
         ## run decoupleR
-        means <- decoupleR::run_wmean(mat = as.matrix(sub_prot), 
+        means <- decoupleR::run_wmean(mat = as.matrix(sub_values), 
             network = signatures, .source = "set", .target = "protein", 
             .mor = "mor", .likelihood = "likelihood", 
             times = args_fct[["n_perm"]])
@@ -110,16 +114,16 @@ scoreSamples <- function(prot, contamination = c("apoptosis", "necroptosis"),
         ## filter the output of decouple, remove some rows and columns and 
         ## store the object in the list
         means <- means |> 
-            dplyr::filter(statistic == "norm_wmean") |>
-            dplyr::filter(condition != "decouplerIsGreat") |> 
-            dplyr::select(-c(statistic, p_value))
+            dplyr::filter(!!as.symbol("statistic") == "norm_wmean") |>
+            dplyr::filter(!!as.symbol("condition") != "decouplerIsGreat") |> 
+            dplyr::select(-all_of(c("statistic", "p_value")))
         score_list[[i]] <- means
     }
 
     ## combine the results (norm_wmean scores) and return the object
-    score_prot <- Reduce("rbind", score_list)
-    colnames(score_prot)[1] <- "set"
-    tibble::tibble(score_prot)
+    score_values <- Reduce("rbind", score_list)
+    colnames(score_values)[1] <- "set"
+    tibble::tibble(score_values)
 }
 
 
@@ -127,9 +131,13 @@ scoreSamples <- function(prot, contamination = c("apoptosis", "necroptosis"),
 #' 
 #' @title Plot the contamination scores of samples
 #' 
-#' @description 
+#' @description
+#' The function \code{plotSampleScores} creates a barplot that visualizes
+#' the contamination scores.
 #' 
-#' @details 
+#' @details
+#' The function takes the argument \code{scores} that can be created via 
+#' \code{scoreSamples}.
 #' 
 #' @param scores tibble
 #' 
@@ -150,21 +158,17 @@ scoreSamples <- function(prot, contamination = c("apoptosis", "necroptosis"),
 #' prot <- assay(tanzer2020)
 #'
 #' ## use the intensities to calculate scores
-#' scores <- scoreSamples(prot = prot, contamination = "apoptosis", n_perm = 100)
-#' scores$condition <- unlist(lapply(
-#'     strsplit(x = scores$condition, split = "LFQ[.]intensity[.]"), "[", 2))
-#' scores$treatment <- unlist(lapply(
-#'     strsplit(scores$condition, split = "_"), "[", 1))
-#' plotSampleScores(scores = scores) + 
+#' scores <- scoreSamples(values = prot, contamination = "apoptosis",fc = 2, n = 1, n_perm = 100)
+#' scores$treatment <- tanzer2020$treatment
+#' plotSampleScores(scores = scores) +
 #'     ggplot2::facet_wrap(~ treatment, scales = "free_x") +
 #'     ggplot2::theme(legend.position = "none")
-#'     
-#' ## use the (modified) loadings vector to calculate scores
-#' loadings <- prcomp(t(prot))$rotation |> 
-#'     as.data.frame()
-#' scores <- scoreSamples(prot = loadings, contamination = "apoptosis", 
-#'     n_perm = 100)
-#' plotSampleScores(scores = scores) + 
+#' 
+#' ## use the intensities to calculate scores
+#' scores <- scoreSamples(values = prot, contamination = "necroptosis", n_perm = 100)
+#' scores$treatment <- tanzer2020$treatment
+#' plotSampleScores(scores = scores) +
+#'     ggplot2::facet_wrap(~ treatment, scales = "free_x") +
 #'     ggplot2::theme(legend.position = "none")
 plotSampleScores <- function(scores) {
     
