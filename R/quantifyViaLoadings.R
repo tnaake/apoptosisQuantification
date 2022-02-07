@@ -129,8 +129,10 @@ getLoadingsOfMarkers <- function(prot, markers) {
 #' 
 #' @examples
 #' protein_names <- c("prot_1;prot_2;NA")
-#' splitNames(protein_names = protein_names, na.rm = FALSE)
-#' splitNames(protein_names = protein_names, na.rm = TRUE)
+#' apoptosisQuantification:::splitNames(protein_names = protein_names,
+#'     na.rm = FALSE)
+#' apoptosisQuantification:::splitNames(protein_names = protein_names,
+#'     na.rm = TRUE)
 splitNames <- function(protein_names, na.rm = TRUE) {
     
     ## split the protein names

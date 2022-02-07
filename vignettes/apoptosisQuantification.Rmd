@@ -99,15 +99,132 @@ and non-markers. If there are effects between the different samples caused
 by apoptosis/necroptosis we expect that the distribution of marker loadings
 is higher than the distribution of non-marker loadings.
 
-```{r}
+We first load the data set.
 
+```{r load_contamination_data, eval = TRUE, echo = TRUE}
+f <- system.file("protein_datasets/tanzer2020.RDS", 
+    package = "apoptosisQuantification")
+tanzer2020 <- readRDS(f)
+
+## obtain the assay slot (contains the transformed intensities)
+library(SummarizedExperiment)
+prot <- assay(tanzer2020)
+```
+
+We then calculate the loadings of markers and non-markers. We wil look here 
+at loadings of principal component 1.
+
+```{r calculate_loadings, eval = TRUE, echo = TRUE}
+## loadings of markers
+loadings_markers <- getLoadingsOfMarkers(prot = prot, 
+    markers = markers_apoptosis)
+vals_markers <- setNames(loadings_markers$PC1, loadings_markers$protein)
+
+## loadings of non-markers 
+vals_all <- prcomp(t(prot))$rotation[, 1]
+
+## combine the values and create a tibble containing the loadings of 
+## markers and non-markers
+tbl <- createLoadingsTbl(vals_markers = vals_markers, vals_all = vals_all)
+```
+
+We then visualize the results (loadings of markers vs. loadings of non-markers).
+
+```{r visualize_loadings, eval = TRUE, echo = TRUE}
+## plot the distribution as ECDF
+plotECDF(tbl)
+
+## histogram (distribution of loadings)
+plotHistogram(tbl)
+```
+
+We perform a Wilcoxon rank sum test. If significant, it is indicated that the
+mean of the marker loadings are higher than the mean of the non-marker loadings. 
+
+```{r wilcoxon_test, eval = TRUE, echo = TRUE}
+performWilcoxonTest(tbl)
 ```
 
 # Assessing apoptosis and necroptosis via mitochondrial protein quantification
 
+Apoptotic cells show an increase in the proportion of gene expression
+which originates from the mitochondria, which occurs after the opening of 
+the MPT pore as apoptosis begins. This gradually results in a decrease in 
+the total expression of chromosomal genes as the DNA is degraded. 
+In late apoptosis, there is typically a drastically reduced total count of 
+genes in a cell, with a large proportion of the gene expression stemming 
+from mitochondria. 
+
+Note, that the proportions of proteomics datasets might not directly 
+interpreted as done in transcriptomics due to the specificities of 
+proteomics data acquisition.
+
+The function \code{calculateProportionOfMitochondrialProteins} calculates
+proportions of the intensities of mitochondrial proteins (i.e. proteins that 
+are encoded in the mitochondrial DNA) to all intensities. The function 
+returns the proportions in percent. 
+
+Mitochondrial proteins are defined by the Human Protein Atlas 
+(1139 proteins found by searching the Human Protein Atlas database for 
+mitochondrial sublocalization). These proteins are matched against the
+proteins found in `prot`. Currently, two types of ids are 
+encoded: either `rownames(prot)` have to be "Symbol" or "Ensembl" ids.
+
+Protein intensities have to in untransformed format such that 
+proportions can be calculated as are. 
+
+```{r back_transform}
+## first back-transform to raw-values
+prot_raw <- exp(prot)
+```
+
+The protein ids of `tanzer2020` are SYMBOL. We specify the `id` argument
+as `"Symbol"`.
+```{r calculate_proportion}
+prop_mito <- calculateProportionOfMitochondrialProteins(prot = prot_raw, 
+    id = "Symbol")
+```
+
+Using the function `plotProportionOfMitochondrialProteins` we visualize the 
+proportion of mitochondrial proteins.
+```{r visualize_proportion}
+plotProportionOfMitochondrialProteins(proportion = prop_mito)
+```
+
 # Assessing apoptosis and necroptosis via decoupleR
 
+Another approach is to calculate contamination scores using the `decoupleR`
+package [@Badia2021]. `decouple` calculates the source activity per sample by
+coupling a regulatory network with the weighted mean (`run_wmean`) statistic. 
+The marker proteins correspond to the target nodes, while the `contamination`
+(`"apoptosis"` or `"necroptosis"`) corresponds to the source nodes. The
+fold changes are taken as the mode of regulation (`mor`). 
+Signature scores represent the number of standard deviations away from the 
+mean of an empirical null distribution of scores.
 
+The contamination scores are calculated per sample. Per default, the markers
+are taken from `readMarkers` when there is no `signatures` argument passed
+to `scoreSamples`. Alternatively, a `tibble` can be passed to the argument
+`signatures` that contains the columns:
+
+ - `protein`: name of marker proteins,
+ - `fold_change`: associated negative or positive fold change associated with
+   the marker.
+   
+If `signatures` is passed as an argument to `scoreSamples` the contamination
+scores are calculated based on the markers defined in this object.
+
+```{r calculate_decoupler_scores, eval = TRUE, echo = TRUE}
+scores <- scoreSamples(values = prot, contamination = "apoptosis", n_perm = 100)
+```
+
+We visualize the scores using the `plotSampleScores` function.
+```{r visualize_decoupler_scores, eval = TRUE, echo = TRUE}
+scores$treatment <- tanzer2020$treatment
+plotSampleScores(scores = scores) +
+    ggplot2::facet_wrap(~ treatment, scales = "free_x") +
+    ggplot2::theme(legend.position = "none")
+```
 
 # Appendix {-}
 
