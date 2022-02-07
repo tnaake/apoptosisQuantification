@@ -1,0 +1,11 @@
+Changes in version 0.99.0 (2021-02-07) 
++ implement quantification method by calculating the proportion of 
+  mitochondrial proteins
++ implement quantification method by comparing the distribution of loadings 
+  of markers and non-markers
++ implement quantification method by decoupleR, where contamination scores 
+  are calculated
++ add functions for visualization for all three approaches
++ add unit tests for all functions
++ add a vignette showcasing the functionality using the data set of Tanzer et al. 
+  (2020)
