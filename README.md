@@ -10,7 +10,7 @@ To install the package, enter
 ```
 if (!requireNamespace("devtools", quietly = TRUE))
     install.packages("devtools")
-devtools::install("tnaake/apoptosisQuantification")
+devtools::install_github("tnaake/apoptosisQuantification")
 ```
 
 ## Methods to quantify apoptosis/necroptosis
