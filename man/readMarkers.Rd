@@ -27,7 +27,7 @@ apoptosis or necroptosis.
 The returned \code{tibble} contains three columns:
 \itemize{
     \item \code{protein}: name of the marker, 
-    \item \code{fold_change}: maximum/minimum fold change from the 
+    \item \code{change}: maximum/minimum fold change from the 
         time-course experiment (maximum absolute value is taken), 
     \item \code{significant_n}: number of significant time-points.
 }

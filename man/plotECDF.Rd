@@ -25,7 +25,7 @@ information on marker/non-marker in the column \code{"type"}.
 library(MatrixQCvis)
 library(SummarizedExperiment)
 
-## Tanzer et al. (2020)
+## load data set of Tanzer et al. (2020)
 ## source: https://www.ebi.ac.uk/pride/archive/projects/PXD014966
 f <- system.file("protein_datasets/tanzer2020.RDS", 
     package = "apoptosisQuantification")

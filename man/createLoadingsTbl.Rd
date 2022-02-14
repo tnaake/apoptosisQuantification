@@ -35,22 +35,7 @@ treated as a marker protein if there is at least one marker protein
 library(MatrixQCvis)
 library(SummarizedExperiment)
 
-## proteomics example data
-f <- system.file("protein_datasets/proteomics_example.RDS", 
-    package = "apoptosisQuantification")
-se <- readRDS(f)
-prot <- assay(se) |> 
-    transformAssay(method = "vsn") |> 
-    imputeAssay(method = "MinDet")
-markers <- readMarkers(type = "apoptosis")
-    
-## get loadings of markers and of the complete data set
-loadings_markers <- getLoadingsOfMarkers(prot = prot, markers = markers)
-vals_all <- prcomp(t(prot))$rotation[, 1]
-vals_markers <- setNames(loadings_markers$PC1, loadings_markers$protein)
-createLoadingsTbl(vals_markers = vals_markers, vals_all = vals_all)
-
-## Tanzer et al. (2020)
+## load data set of Tanzer et al. (2020)
 ## source: https://www.ebi.ac.uk/pride/archive/projects/PXD014966
 f <- system.file("protein_datasets/tanzer2020.RDS", 
     package = "apoptosisQuantification")

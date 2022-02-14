@@ -13,8 +13,9 @@ plotSampleScores(scores)
 \code{gg}
 }
 \description{
-The function \code{plotSampleScores} creates a barplot that visualizes
-the contamination scores.
+The function \code{plotSampleScores} creates a barplot or boxplot that 
+visualizes the contamination score values obtained by 
+\code{scoreSamples}.
 }
 \details{
 The function takes the argument \code{scores} that can be created via 

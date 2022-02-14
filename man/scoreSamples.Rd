@@ -17,21 +17,30 @@ scoreSamples(values, contamination = c("apoptosis", "necroptosis"), ...)
 \value{
 data.frame, containining normalized enrichment (mean) scores for the
 contamination signature (the higher the score, the higher the potential
-contamination)
+contamination). If there is no quantitative information on changes 
+(e.g. fold changes or t-values), the function will return an empirical
+distribution of difference of means of the markers to all proteins in the 
+data set
 }
 \description{
 This function performs an enrichment analysis to test whether a given
 proteomic sample is contaminated with markers from apoptosis or necroptosis.
-The signatures are taken from Tanzer et al. (2020).
 }
 \details{
-The function is insprired by the work of Aurelien Dugourd and his 
-plasmaContamination package 
-(https://github.com/saezlab/plasmaContamination/).
-
 The parameter \code{values} has to have (gene) symbols as \code{row.names}.
 \code{values} can be either a numeric \code{vector}, \code{matrix}, or 
-\code{data.frame}. It can hold the normalized
+\code{data.frame}. It holds the normalized intensity values of proteins.
+
+The signatures are taken per default from Tanzer et al. (2020), but also 
+a \code{tibble} containing the contamination markers can be given to the 
+function as argument \code{signatures}. 
+In that case the \code{tibble} has to contain at least the 
+column \code{"protein"} that contains the marker proteins.  
+
+The function will either run \code{decoupleProteins} or 
+\code{permuteProteins} to calculate scores. The behaviour will be triggered
+by the presence of the column \code{value} in \code{signatures} (in that 
+case, \code{decoupleProteins} is run).
 }
 \examples{
 library(SummarizedExperiment)
@@ -41,8 +50,12 @@ f <- system.file("protein_datasets/tanzer2020.RDS",
 tanzer2020 <- readRDS(f)
 prot <- assay(tanzer2020)
 
-## use the intensities to calculate scores
+## use the intensities to calculate scores, the function will load the 
+## data set of Tanzer et al. (2020)
 scoreSamples(values = prot, contamination = "apoptosis", n_perm = 100)
+
+## use the contamination scores of Tanzer et al. (2020), but with specified
+## fc and n_significan
 }
 \references{
 Tanzer et al. (2020): Quantitative and Dynamic Catalogs of Proteins 
