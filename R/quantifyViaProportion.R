@@ -158,7 +158,7 @@ plotProportionOfMitochondrialProteins <- function(proportion) {
     
     ## add 1:length(proportion) as names for proportion if there are no
     ## pre-defined names
-    if (is.null(names(proportion))) 
+    if (is.null(names(proportion)))
         names(proportion) <- seq_len(length(proportion))
     
     proportion <- tibble::tibble(value = proportion, 
