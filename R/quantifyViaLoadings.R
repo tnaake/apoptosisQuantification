@@ -68,7 +68,7 @@ getLoadingsOfMarkers <- function(prot, markers) {
     markers_protein <- splitNames(markers$protein, na.rm = FALSE)#strsplit(markers$protein, split = ";")
     markers_protein_len <- unlist(lapply(markers_protein, length))
     markers <- tibble::tibble(protein = unlist(markers_protein),
-        fold_change = rep(markers$fold_change, times = markers_protein_len),
+        change = rep(markers$change, times = markers_protein_len),
         significant_n = rep(markers$significant_n, times = markers_protein_len))
     
     ## remove duplicated entries
@@ -267,22 +267,7 @@ combineLoadings <- function(loadings, PC = c("PC1", "PC2")) {
 #' library(MatrixQCvis)
 #' library(SummarizedExperiment)
 #'
-#' ## proteomics example data
-#' f <- system.file("protein_datasets/proteomics_example.RDS", 
-#'     package = "apoptosisQuantification")
-#' se <- readRDS(f)
-#' prot <- assay(se) |> 
-#'     transformAssay(method = "vsn") |> 
-#'     imputeAssay(method = "MinDet")
-#' markers <- readMarkers(type = "apoptosis")
-#'     
-#' ## get loadings of markers and of the complete data set
-#' loadings_markers <- getLoadingsOfMarkers(prot = prot, markers = markers)
-#' vals_all <- prcomp(t(prot))$rotation[, 1]
-#' vals_markers <- setNames(loadings_markers$PC1, loadings_markers$protein)
-#' createLoadingsTbl(vals_markers = vals_markers, vals_all = vals_all)
-#' 
-#' ## Tanzer et al. (2020)
+#' ## load data set of Tanzer et al. (2020)
 #' ## source: https://www.ebi.ac.uk/pride/archive/projects/PXD014966
 #' f <- system.file("protein_datasets/tanzer2020.RDS", 
 #'     package = "apoptosisQuantification")
@@ -353,7 +338,7 @@ createLoadingsTbl <- function(vals_markers = vals_markers, vals_all = vals_all) 
 #' library(MatrixQCvis)
 #' library(SummarizedExperiment)
 #' 
-#' ## Tanzer et al. (2020)
+#' ## load data set of Tanzer et al. (2020)
 #' ## source: https://www.ebi.ac.uk/pride/archive/projects/PXD014966
 #' f <- system.file("protein_datasets/tanzer2020.RDS", 
 #'     package = "apoptosisQuantification")
@@ -417,23 +402,7 @@ plotECDF <- function(tbl) {
 #' library(MatrixQCvis)
 #' library(SummarizedExperiment)
 #' 
-#' ## proteomics example data
-#' f <- system.file("protein_datasets/proteomics_example.RDS", 
-#'     package = "apoptosisQuantification")
-#' se <- readRDS(f)
-#' prot <- assay(se) |> 
-#'     transformAssay(method = "vsn") |> 
-#'     imputeAssay(method = "MinDet")
-#' markers <- readMarkers(type = "apoptosis", fc = 2, n = 1)
-#'     
-#' ## get loadings of markers and of the complete data set
-#' loadings_markers <- getLoadingsOfMarkers(prot = prot, markers = markers)
-#' vals_all <- prcomp(t(prot))$rotation[, 1]
-#' vals_markers <- setNames(loadings_markers$PC1, loadings_markers$protein)
-#' tbl <- createLoadingsTbl(vals_markers = vals_markers, vals_all = vals_all)
-#' plotHistogram(tbl)
-#' 
-#' ## Tanzer et al. (2020)
+#' ## load data set of Tanzer et al. (2020)
 #' ## source: https://www.ebi.ac.uk/pride/archive/projects/PXD014966
 #' f <- system.file("protein_datasets/tanzer2020.RDS",
 #'     package = "apoptosisQuantification")
@@ -500,7 +469,7 @@ plotHistogram <- function(tbl) {
 #' library(MatrixQCvis)
 #' library(SummarizedExperiment)
 #' 
-#' ## Tanzer et al. (2020)
+#' ## load data set of Tanzer et al. (2020)
 #' ## source: https://www.ebi.ac.uk/pride/archive/projects/PXD014966
 #' f <- system.file("protein_datasets/tanzer2020.RDS", 
 #'     package = "apoptosisQuantification")
