@@ -91,6 +91,20 @@ The returned `tibble` contains three columns:
     (absolute value is taken to define the maximum change), 
  - `significant_n`: number of significant time-points.
 
+Alternatively, we load a list of hallmark genes that are changed in
+programmed cell death. The list is taken from @Liberzon2015
+(accessed via 
+[GSEA](https://www.gsea-msigdb.org/gsea/msigdb/cards/HALLMARK_APOPTOSIS.html)).
+In the following, we create a tibble containing these proteins in the 
+`protein` column.
+```{r }
+## truncate the markers with
+f <- system.file("protein_markers/geneset_HALLMARK_APOPTOSIS.RDS", 
+    package = "apoptosisQuantification")
+hallmark_genes <- readRDS(f)
+hallmark_genes <- tibble(protein = hallmark_genes)
+```
+
 
 # Assessing apoptosis and necroptosis via loadings
 
