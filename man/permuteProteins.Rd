@@ -24,9 +24,19 @@ permuteProteins(
 \item{seed}{\code{numeric(1)}}
 }
 \description{
-The function \code{permuteProteins} calculates the difference
+The function \code{permuteProteins} calculates the difference between the
+mean of marker proteins and random samples of the protein universe 
+(proteins in \code{values}). The scores will be a relative quantification
+of the marker proteins to the universe protein intensities. Samples that 
+undergo apoptosis (or any other contamination) will have different 
+differences than uncontaminated samples.
+
+The output will be a \code{tibble} containing the differences in means
+for the samples and repetitions.
 }
 \details{
+The number of repetitions is defined by \code{n_perm}.
+
 The function will be called in \code{scoreSamples}.
 }
 \examples{
