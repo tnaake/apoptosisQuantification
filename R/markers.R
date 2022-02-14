@@ -9,7 +9,7 @@
 #' The returned \code{tibble} contains three columns:
 #' \itemize{
 #'     \item \code{protein}: name of the marker, 
-#'     \item \code{fold_change}: maximum/minimum fold change from the 
+#'     \item \code{change}: maximum/minimum fold change from the 
 #'         time-course experiment (maximum absolute value is taken), 
 #'     \item \code{significant_n}: number of significant time-points.
 #' }
@@ -118,6 +118,6 @@ readMarkers <- function(type = c("apoptosis", "necroptosis"), fc = 2, n = 1) {
     ## fold change, and the number of time points the fold change was
     ## significant
     tibble::tibble(protein = dplyr::pull(tbl[markers_logical, ], "Gene.names"),
-        fold_change = fc_max[markers_logical],
+        change = fc_max[markers_logical],
         significant_n = sign_n[markers_logical])
 }
