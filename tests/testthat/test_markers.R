@@ -4,22 +4,22 @@ test_that("readMarkers works.", {
     necroptosis <- readMarkers(type = "necroptosis", fc = 1, n = 2)
     expect_is(apoptosis, "tbl")
     expect_equal(colnames(apoptosis), 
-        c("protein", "fold_change", "significant_n"))
+        c("protein", "change", "significant_n"))
     expect_equal(dim(apoptosis), c(89, 3))
     expect_equal(apoptosis$protein[1:5], 
         c("ACSL4", "ADNP", "AP1G1", "ASPSCR1", "ASRGL1"))
-    expect_equal(apoptosis$fold_change[1:5], 
+    expect_equal(apoptosis$change[1:5], 
         c(2.477711, 2.057616, 2.040779, 1.479240, 2.152555),
         tolerance = 1e-06)
     expect_equal(apoptosis$significant_n[1:5], 
         c(1, 1, 1, 1, 1))
     expect_is(necroptosis, "tbl")
     expect_equal(colnames(necroptosis), 
-        c("protein", "fold_change", "significant_n"))
+        c("protein", "change", "significant_n"))
     expect_equal(dim(necroptosis), c(253, 3))
     expect_equal(necroptosis$protein[1:5], 
         c("ACIN1", "ACOT13", "ACSL4", "ACY1;ABHD14A-ACY1", "ADAR"))
-    expect_equal(necroptosis$fold_change[1:5], 
+    expect_equal(necroptosis$change[1:5], 
         c(2.117764, -2.305560, 1.440479, -2.364775, 3.851311),
         tolerance = 1e-06)
     expect_equal(necroptosis$significant_n[1:5], 
