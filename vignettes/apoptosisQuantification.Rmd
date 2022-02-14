@@ -87,7 +87,7 @@ markers_necroptosis <- readMarkers(type = "necroptosis", fc = 2, n = 1)
 The returned `tibble` contains three columns:
 
  - `protein`: name of the marker, 
- - `fold_change`: maximum/minimum fold change from the time-course experiment 
+ - `change`: maximum/minimum fold change from the time-course experiment 
     (absolute value is taken to define the maximum change), 
  - `significant_n`: number of significant time-points.
 
@@ -222,7 +222,7 @@ to `scoreSamples`. Alternatively, a `tibble` can be passed to the argument
 `signatures` that contains the columns:
 
  - `protein`: name of marker proteins,
- - `fold_change`: associated negative or positive fold change associated with
+ - `change`: associated negative or positive fold change associated with
    the marker.
    
 If `signatures` is passed as an argument to `scoreSamples` the contamination
@@ -238,6 +238,37 @@ scores$treatment <- tanzer2020$treatment
 plotSampleScores(scores = scores) +
     ggplot2::facet_wrap(~ treatment, scales = "free_x") +
     ggplot2::theme(legend.position = "none")
+```
+
+# Assessing apoptosis and necroptosis via differences in marker expression to protein set
+
+Alternatively, the contaminations can also be assessed in a relative manner
+by looking at the distributions of differences between the marker
+proteins and a random subset (possibly including the marker proteins). 
+To do this, a `signatures` object (`tibble`) has to be passed that 
+does not contain the column `change` (i.e. whenenver there is the column
+`change` in `signatures` the `decoupleR` approach will be taken).
+
+As an example we use here the `hallmark_genes` object that contains a list
+of proteins (stored in the column `protein`).
+
+```{r show_hallmark_genes_object}
+hallmark_genes
+```
+
+We then call the function `scoreSamples`. We specify that we draw 100 random
+proteins from `prot` (`n_perm`) and specify the marker gene set by
+the `signatures` argument.
+
+```{r calculate_permuteProteins_scores, eval = TRUE, echo = TRUE}
+scores <- scoreSamples(values = prot, contamination = "apoptosis", n_perm = 100,
+    signatures = hallmark_genes)
+```
+
+Finally, we plot the scores.
+
+```{r visualize_permuteProteins_scores, eval = TRUE, echo = TRUE}
+plotSampleScores(scores = scores)
 ```
 
 # Appendix {-}
