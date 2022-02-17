@@ -10,11 +10,11 @@ readMarkers(type = c("apoptosis", "necroptosis"), fc = 2, n = 1)
 \item{type}{character, \code{"apoptosis"} or \code{"necroptosis"}}
 
 \item{fc}{numeric(1), threshold for fold change (default 2), e.g. if set to
-2, the proteins are retained that have absolute fold changes greater or equal
+2, the features are retained that have absolute fold changes greater or equal
 to \code{fc}}
 
 \item{n}{numeric, threshold for number of significant time points
-(default 1), e.g. if set to 1, the proteins are retained that have at 
+(default 1), e.g. if set to 1, the features are retained that have at 
 least 1 significant time point}
 }
 \value{
@@ -26,7 +26,7 @@ apoptosis or necroptosis.
 
 The returned \code{tibble} contains three columns:
 \itemize{
-    \item \code{protein}: name of the marker, 
+    \item \code{feature}: name of the marker, 
     \item \code{change}: maximum/minimum fold change from the 
         time-course experiment (maximum absolute value is taken), 
     \item \code{significant_n}: number of significant time-points.
