@@ -8,7 +8,7 @@
 #' 
 #' The returned \code{tibble} contains three columns:
 #' \itemize{
-#'     \item \code{protein}: name of the marker, 
+#'     \item \code{feature}: name of the marker, 
 #'     \item \code{change}: maximum/minimum fold change from the 
 #'         time-course experiment (maximum absolute value is taken), 
 #'     \item \code{significant_n}: number of significant time-points.
@@ -48,10 +48,10 @@
 #' 
 #' @param type character, \code{"apoptosis"} or \code{"necroptosis"}
 #' @param fc numeric(1), threshold for fold change (default 2), e.g. if set to
-#' 2, the proteins are retained that have absolute fold changes greater or equal
+#' 2, the features are retained that have absolute fold changes greater or equal
 #' to \code{fc}
 #' @param n numeric, threshold for number of significant time points
-#' (default 1), e.g. if set to 1, the proteins are retained that have at 
+#' (default 1), e.g. if set to 1, the features are retained that have at 
 #' least 1 significant time point
 #' 
 #' @return tibble
@@ -89,7 +89,7 @@ readMarkers <- function(type = c("apoptosis", "necroptosis"), fc = 2, n = 1) {
     ## find the columns that contain the information on the significance
     sign_inds <- grep(x = cols, pattern = "Significant.TNF[+]SM")
 
-    ## determine the proteins that are significant in at least n time
+    ## determine the features that are significant in at least n time
     ## course events, depending if type is apoptosis or necroptosis
 
     sign_logical <- apply(t(tbl[, sign_inds]), 1, 
@@ -97,7 +97,7 @@ readMarkers <- function(type = c("apoptosis", "necroptosis"), fc = 2, n = 1) {
     sign_n <- apply(sign_logical, 1, sum)
 
     ## look now into the fold changes and find the absolute highest fold change
-    ## for the significant proteins, store these fold changes in a list (fc_max)
+    ## for the significant features, store these fold changes in a list (fc_max)
     fc_inds <- grep(x = cols, pattern = "Fold.change.[(]Log2[)]")
     fc_tbl <- tbl[, fc_inds]
     fc_max <- lapply(seq_len(nrow(tbl)), function(row_i) {
@@ -109,15 +109,15 @@ readMarkers <- function(type = c("apoptosis", "necroptosis"), fc = 2, n = 1) {
     })
     fc_max <- unlist(fc_max)
 
-    ## create a logical vector that stores information about which proteins
+    ## create a logical vector that stores information about which features
     ## to take (the ones that have significant times point greater or equal
     ## to n and that have fc_max > 0.5)
     markers_logical <- sign_n >= n & (!is.na(fc_max) & abs(fc_max) >= fc)
     
-    ## return the tibble, store inside the protein name, the max (absolute) 
+    ## return the tibble, store inside the feature name, the max (absolute) 
     ## fold change, and the number of time points the fold change was
     ## significant
-    tibble::tibble(protein = dplyr::pull(tbl[markers_logical, ], "Gene.names"),
+    tibble::tibble(feature = dplyr::pull(tbl[markers_logical, ], "Gene.names"),
         change = fc_max[markers_logical],
         significant_n = sign_n[markers_logical])
 }
