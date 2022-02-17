@@ -19,7 +19,7 @@ data.frame, containining normalized enrichment (mean) scores for the
 contamination signature (the higher the score, the higher the potential
 contamination). If there is no quantitative information on changes 
 (e.g. fold changes or t-values), the function will return an empirical
-distribution of difference of means of the markers to all proteins in the 
+distribution of difference of means of the markers to all features in the 
 data set
 }
 \description{
@@ -29,18 +29,19 @@ proteomic sample is contaminated with markers from apoptosis or necroptosis.
 \details{
 The parameter \code{values} has to have (gene) symbols as \code{row.names}.
 \code{values} can be either a numeric \code{vector}, \code{matrix}, or 
-\code{data.frame}. It holds the normalized intensity values of proteins.
+\code{data.frame}. It holds the normalized intensity values of features 
+(e.g. proteins).
 
 The signatures are taken per default from Tanzer et al. (2020), but also 
 a \code{tibble} containing the contamination markers can be given to the 
 function as argument \code{signatures}. 
 In that case the \code{tibble} has to contain at least the 
-column \code{"protein"} that contains the marker proteins.  
+column \code{"feature"} that contains the marker features (e.g. proteins).  
 
-The function will either run \code{decoupleProteins} or 
-\code{permuteProteins} to calculate scores. The behaviour will be triggered
+The function will either run \code{decoupleFeatures} or 
+\code{permuteFeatures} to calculate scores. The behaviour will be triggered
 by the presence of the column \code{value} in \code{signatures} (in that 
-case, \code{decoupleProteins} is run).
+case, \code{decoupleFeatures} is run).
 }
 \examples{
 library(SummarizedExperiment)
