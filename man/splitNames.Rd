@@ -4,17 +4,17 @@
 \alias{splitNames}
 \title{Split the names when separated by ;}
 \usage{
-splitNames(protein_names, na.rm = TRUE)
+splitNames(feature_names, na.rm = TRUE)
 }
 \arguments{
-\item{protein_names}{character}
+\item{feature_names}{character}
 
 \item{na.rm}{logical(1)}
 }
 \description{
-The function \code{splitNames} creates a ";"-separated list of protein names. 
-If \code{na.rm = TRUE}, the \code{NA} values within the protein names 
-are removed. \code{NA} values might occur if protein names are translated
+The function \code{splitNames} creates a ";"-separated list of feature names. 
+If \code{na.rm = TRUE}, the \code{NA} values within the feature names 
+are removed. \code{NA} values might occur if feature names are translated
 from one id to the other, e.g. from SYMBOL to Ensembl.
 }
 \details{
@@ -23,8 +23,8 @@ package.
 }
 \examples{
 protein_names <- c("prot_1;prot_2;NA")
-apoptosisQuantification:::splitNames(protein_names = protein_names,
+apoptosisQuantification:::splitNames(feature_names = protein_names,
     na.rm = FALSE)
-apoptosisQuantification:::splitNames(protein_names = protein_names,
+apoptosisQuantification:::splitNames(feature_names = protein_names,
     na.rm = TRUE)
 }
