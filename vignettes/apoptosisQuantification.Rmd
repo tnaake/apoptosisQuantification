@@ -86,7 +86,7 @@ markers_necroptosis <- readMarkers(type = "necroptosis", fc = 2, n = 1)
 
 The returned `tibble` contains three columns:
 
- - `protein`: name of the marker, 
+ - `feature`: name of the marker, 
  - `change`: maximum/minimum fold change from the time-course experiment 
     (absolute value is taken to define the maximum change), 
  - `significant_n`: number of significant time-points.
@@ -96,13 +96,13 @@ programmed cell death. The list is taken from @Liberzon2015
 (accessed via 
 [GSEA](https://www.gsea-msigdb.org/gsea/msigdb/cards/HALLMARK_APOPTOSIS.html)).
 In the following, we create a tibble containing these proteins in the 
-`protein` column.
+`feature` column.
 ```{r }
 ## truncate the markers with
 f <- system.file("protein_markers/geneset_HALLMARK_APOPTOSIS.RDS", 
     package = "apoptosisQuantification")
 hallmark_genes <- readRDS(f)
-hallmark_genes <- tibble(protein = hallmark_genes)
+hallmark_genes <- tibble(feature = hallmark_genes)
 ```
 
 
@@ -125,38 +125,26 @@ library(SummarizedExperiment)
 prot <- assay(tanzer2020)
 ```
 
-We then calculate the loadings of markers and non-markers. We wil look here 
-at loadings of principal component 1.
-
-```{r calculate_loadings, eval = TRUE, echo = TRUE}
-## loadings of markers
-loadings_markers <- getLoadingsOfMarkers(prot = prot, 
-    markers = markers_apoptosis)
-vals_markers <- setNames(loadings_markers$PC1, loadings_markers$protein)
-
-## loadings of non-markers 
-vals_all <- prcomp(t(prot))$rotation[, 1]
-
-## combine the values and create a tibble containing the loadings of 
-## markers and non-markers
-tbl <- createLoadingsTbl(vals_markers = vals_markers, vals_all = vals_all)
-```
-
-We then visualize the results (loadings of markers vs. loadings of non-markers).
+We then calculate the loadings of markers and non-markers. We will look here 
+at loadings of principal component 1 and
+visualize the results (loadings of markers vs. loadings of non-markers).
 
 ```{r visualize_loadings, eval = TRUE, echo = TRUE}
 ## plot the distribution as ECDF
-plotECDF(tbl)
+plotECDF(values = prot, markers = markers_apoptosis, PC = "PC1")
 
 ## histogram (distribution of loadings)
-plotHistogram(tbl)
+plotHistogram(values = prot, markers = markers_apoptosis, PC = "PC1")
+
+## violin plot (distribution of loadings)
+plotViolin(values = prot, markers = markers_apoptosis, PC = "PC1")
 ```
 
 We perform a Wilcoxon rank sum test. If significant, it is indicated that the
 mean of the marker loadings are higher than the mean of the non-marker loadings. 
 
 ```{r wilcoxon_test, eval = TRUE, echo = TRUE}
-performWilcoxonTest(tbl)
+performWilcoxonTest(values = prot, markers = markers_apoptosis, PC = "PC1")
 ```
 
 # Assessing apoptosis and necroptosis via mitochondrial protein quantification
@@ -195,7 +183,7 @@ prot_raw <- exp(prot)
 The protein ids of `tanzer2020` are SYMBOL. We specify the `id` argument
 as `"Symbol"`.
 ```{r calculate_proportion}
-prop_mito <- calculateProportionOfMitochondrialProteins(prot = prot_raw, 
+prop_mito <- calculateProportionOfMitochondrialProteins(values = prot_raw, 
     id = "Symbol")
 ```
 
@@ -221,7 +209,7 @@ are taken from `readMarkers` when there is no `signatures` argument passed
 to `scoreSamples`. Alternatively, a `tibble` can be passed to the argument
 `signatures` that contains the columns:
 
- - `protein`: name of marker proteins,
+ - `feature`: name of marker proteins,
  - `change`: associated negative or positive fold change associated with
    the marker.
    
@@ -250,7 +238,7 @@ does not contain the column `change` (i.e. whenenver there is the column
 `change` in `signatures` the `decoupleR` approach will be taken).
 
 As an example we use here the `hallmark_genes` object that contains a list
-of proteins (stored in the column `protein`).
+of proteins (stored in the column `feature`).
 
 ```{r show_hallmark_genes_object}
 hallmark_genes
