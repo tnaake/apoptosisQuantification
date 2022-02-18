@@ -55,8 +55,11 @@
 #'     markers = markers)
 getLoadingsOfMarkers <- function(values, markers) {
     
+    if (!(is.matrix(values) | is.data.frame(values)))
+        stop("'values' is not a matrix or a data.frame")
+       
     if (!methods::is(markers, "tbl"))
-        stop("'markers' is not a tibble")
+        stop("'markers' is not a tbl")
     
     ## calculate the loadings
     pca <- values |> 
@@ -199,9 +202,9 @@ splitNames <- function(feature_names, na.rm = TRUE) {
 #' 
 #' @importFrom dplyr all_of as_tibble select pull
 #' @importFrom MatrixQCvis transformAssay imputeAssay
+#' @importFrom methods is
 #' @importFrom stats setNames
 #' @importFrom SummarizedExperiment assay
-#' @importFrom tibble is_tibble
 #' 
 #' @export
 #' 
@@ -224,8 +227,8 @@ splitNames <- function(feature_names, na.rm = TRUE) {
 #'     PC = c("PC1", "PC2")) 
 combineLoadings <- function(loadings, PC = c("PC1", "PC2")) {
     
-    if (!tibble::is_tibble(loadings))
-        stop("'loadings' is not a tibble")
+    if (!methods::is(loadings, "tbl"))
+        stop("'loadings' is not a tbl")
     
     ## select the PCs of interest
     names_loadings <- loadings |> 
@@ -344,7 +347,7 @@ createLoadingsTbl <- function(vals_markers = vals_markers, vals_all = vals_all) 
 #' components
 #' 
 #' @importFrom methods is
-#' @importFrom tibble rownames_to_column is_tibble
+#' @importFrom tibble rownames_to_column
 #'
 #' @examples 
 #' library(MatrixQCvis)
@@ -357,10 +360,10 @@ createLoadingsTbl <- function(vals_markers = vals_markers, vals_all = vals_all) 
 #' tanzer2020 <- readRDS(f)
 #' 
 #' ## get loadings of markers and of the complete data set
-#' prot <- assay(tanzer2020)
+#' values <- assay(tanzer2020)
 #' markers <- readMarkers(type = "apoptosis")
 #' 
-#' apoptosisQuantification:::prepareTbl(values = prot, markers = markers, 
+#' apoptosisQuantification:::prepareTbl(values = values, markers = markers, 
 #'     PC = "PC1")
 prepareTbl <- function(values, markers, PC = "PC1") {
     
@@ -421,7 +424,7 @@ prepareTbl <- function(values, markers, PC = "PC1") {
 #' 
 #' @importFrom ggplot2 ggplot aes_string geom_point xlab ylab theme_bw
 #' @importFrom plotly ggplotly subplot
-#' @importFrom tibble is_tibble
+#' @importFrom methods is
 #' 
 #' @examples
 #' library(MatrixQCvis)
@@ -443,8 +446,8 @@ plotPCAandLoadings <- function(values, markers, x_coord = "PC1", y_coord = "PC2"
     
     if (!(is.matrix(values) | is.data.frame(values)))
         stop("'values' is not a matrix or a data.frame")
-    if (!tibble::is_tibble(markers))
-        stop("'markers' is not a tibble")
+    if (!methods::is(markers, "tbl"))
+        stop("'markers' is not a tbl")
     
     if (!any(markers$feature %in% rownames(values)))
         stop("There is no 'feature' in 'markers' that was found in 'rownames(values)'")
@@ -539,7 +542,6 @@ plotPCAandLoadings <- function(values, markers, x_coord = "PC1", y_coord = "PC2"
 #' @importFrom MatrixQCvis transformAssay imputeAssay
 #' @importFrom stats setNames
 #' @importFrom SummarizedExperiment assay
-#' @importFrom tibble is_tibble
 #' 
 #' @examples 
 #' library(MatrixQCvis)
