@@ -442,9 +442,18 @@ prepareTbl <- function(values, markers, PC = "PC1") {
 plotPCAandLoadings <- function(values, markers, x_coord = "PC1", y_coord = "PC2") {
     
     if (!(is.matrix(values) | is.data.frame(values)))
-        stop("'values' has to be either a matrix, data.frame or tibble")
+        stop("'values' is not a matrix or a data.frame")
     if (!tibble::is_tibble(markers))
-        stop("'markers' has to be a tibble")
+        stop("'markers' is not a tibble")
+    
+    if (!any(markers$feature %in% rownames(values)))
+        stop("There is no 'feature' in 'markers' that was found in 'rownames(values)'")
+    
+    if (!is.vector(x_coord, mode = "character") & length(x_coord) != 1)
+        stop("'x_coord' is not a character vector of length 1")
+    
+    if (!is.vector(y_coord, mode = "character") & length(y_coord) != 1)
+        stop("'y_coord' is not a character vector of length 1")
     
     loadings_markers <- getLoadingsOfMarkers(values = values, markers = markers)
     
