@@ -44,7 +44,7 @@ test_that("scoreSamples works.", {
     expect_equal(sum(scores_apoptosis$value), -117.152, tolerance = 1e-01)
     expect_equal(sum(scores_necroptosis$value), -105.8398, tolerance = 1e-01)
     
-    ## fc = 0.1, n = 1, calls decoupleProteins
+    ## fc = 0.1, n = 1, calls decoupleFeatures
     expect_equal(sum(
         scoreSamples(values = prot[, 1:10], contamination = "apoptosis", 
             fc = 0.1, n = 1, n_perm = 10)$value), 
@@ -55,7 +55,7 @@ test_that("scoreSamples works.", {
             n_perm = 10, signatures = signatures)$value), 
         -43.36388, tolerance = 1e-01)
     
-    ## fc = 3, n = 1, calls decoupleProteins
+    ## fc = 3, n = 1, calls decoupleFeatures
     signatures <- readMarkers("apoptosis", fc = 3, n = 1)
     expect_equal(sum(scoreSamples(values = prot[, 1:10], 
             contamination = "apoptosis", n_perm = 10, 
@@ -70,8 +70,8 @@ test_that("scoreSamples works.", {
     expect_error(scoreSamples(values = prot, contamination = "foo"),
         "'arg' should be one of ")
     
-    ## fc = 0.1, n = 1, calls permuteProteins
-    signatures <- readMarkers("apoptosis", fc = 0.1, n = 1)[, "protein"]
+    ## fc = 0.1, n = 1, calls permuteFeatures
+    signatures <- readMarkers("apoptosis", fc = 0.1, n = 1)[, "feature"]
     scores <- scoreSamples(value = prot[, 1:10], contamination = "apoptosis",
         signatures = signatures)
     expect_equal(dim(scores), c(10000, 3))
@@ -85,8 +85,8 @@ test_that("scoreSamples works.", {
             "DMSO_3h_4", "DMSO_5h_2", "DMSO_5h_3", "DMSO_5h_4", "DMSO_7h_2"))
     expect_equal(unique(scores$set), "apoptosis")
     
-    ## fc = 3, n = 1, calls permuteProteins
-    signatures <- readMarkers("apoptosis", fc = 3, n = 1)[, "protein"]
+    ## fc = 3, n = 1, calls permuteFeatures
+    signatures <- readMarkers("apoptosis", fc = 3, n = 1)[, "feature"]
     scores <- scoreSamples(values = prot[, 1:10], contamination = "apoptosis",
         signatures = signatures)
     expect_equal(dim(scores), c(10000, 3))
@@ -101,14 +101,14 @@ test_that("scoreSamples works.", {
     expect_equal(unique(scores$set), "apoptosis")
 })
 
-## function decoupleProteins
-test_that("decoupleProteins works.", {
+## function decoupleFeatures
+test_that("decoupleFeatures works.", {
     args_fct <- list()
     args_fct[["n_perm"]] <- 10
     args_fct[["signatures"]] <- readMarkers("apoptosis", fc = 2, n = 1)
     prot_df <- prot[, 1:10] |>
         as.data.frame()
-    scores <- decoupleProteins(values = prot_df, args_fct = args_fct, 
+    scores <- decoupleFeatures(values = prot_df, args_fct = args_fct, 
         contamination = "apoptosis")
     expect_equal(dim(scores), c(10, 3))
     expect_equal(unique(scores$set), "apoptosis")
@@ -124,34 +124,34 @@ test_that("decoupleProteins works.", {
     ## entry signatures
     args_foo <- list()
     args_foo[["n_perm"]] <- 10
-    expect_error(decoupleProteins(values = prot_df, args_fct = args_foo, 
+    expect_error(decoupleFeatures(values = prot_df, args_fct = args_foo, 
             contamination = "apoptosis"),
         "'signatures' not in 'names[(]args_fct[)]'")
     
     ## entry n_perm
     args_foo <- list()
     args_foo[["signatures"]] <- readMarkers("apoptosis", fc = 2, n = 1)
-    expect_error(decoupleProteins(values = prot_df, args_fct = args_foo, 
+    expect_error(decoupleFeatures(values = prot_df, args_fct = args_foo, 
         contamination = "apoptosis"), "'n_perm' not in 'names[(]args_fct[)]'")
     args_foo[["n_perm"]] <- NULL
-    expect_error(decoupleProteins(values = prot_df, args_fct = args_foo, 
+    expect_error(decoupleFeatures(values = prot_df, args_fct = args_foo, 
         contamination = "apoptosis"), "'n_perm' not in 'names[(]args_fct[)]'")
     args_foo[["n_perm"]] <- "abc"
-    expect_error(decoupleProteins(values = prot_df, args_fct = args_foo, 
+    expect_error(decoupleFeatures(values = prot_df, args_fct = args_foo, 
         contamination = "apoptosis"), "'n_perm' has to be numeric of length 1")
     args_foo[["n_perm"]] <- c(1, 2)
-    expect_error(decoupleProteins(values = prot_df, args_fct = args_foo, 
+    expect_error(decoupleFeatures(values = prot_df, args_fct = args_foo, 
         contamination = "apoptosis"), "'n_perm' has to be numeric of length 1")
 })
 
-## function permuteProteins
-test_that("permuteProteins works.", {
+## function permuteFeatures
+test_that("permuteFeatures works.", {
     args_fct <- list()
     args_fct[["n_perm"]] <- 10
     args_fct[["signatures"]] <- readMarkers("apoptosis", fc = 2, n = 1)
     prot_df <- prot[, 1:10] |>
         as.data.frame()
-    scores <- permuteProteins(values = prot_df, args_fct = args_fct, 
+    scores <- permuteFeatures(values = prot_df, args_fct = args_fct, 
         contamination = "apoptosis", seed = 2022)
     expect_equal(dim(scores), c(100, 3))
     expect_equal(unique(scores$set), "apoptosis")
@@ -167,23 +167,23 @@ test_that("permuteProteins works.", {
     ## entry signatures
     args_foo <- list()
     args_foo[["n_perm"]] <- 10
-    expect_error(permuteProteins(values = prot_df, args_fct = args_foo, 
+    expect_error(permuteFeatures(values = prot_df, args_fct = args_foo, 
         contamination = "apoptosis"),
         "'signatures' not in 'names[(]args_fct[)]'")
     
     ## entry n_perm
     args_foo <- list()
     args_foo[["signatures"]] <- readMarkers("apoptosis", fc = 2, n = 1)
-    expect_error(permuteProteins(values = prot_df, args_fct = args_foo, 
+    expect_error(permuteFeatures(values = prot_df, args_fct = args_foo, 
         contamination = "apoptosis"), "'n_perm' not in 'names[(]args_fct[)]'")
     args_foo[["n_perm"]] <- NULL
-    expect_error(permuteProteins(values = prot_df, args_fct = args_foo, 
+    expect_error(permuteFeatures(values = prot_df, args_fct = args_foo, 
         contamination = "apoptosis"), "'n_perm' not in 'names[(]args_fct[)]'")
     args_foo[["n_perm"]] <- "abc"
-    expect_error(permuteProteins(values = prot_df, args_fct = args_foo, 
+    expect_error(permuteFeatures(values = prot_df, args_fct = args_foo, 
         contamination = "apoptosis"), "'n_perm' has to be numeric of length 1")
     args_foo[["n_perm"]] <- c(1, 2)
-    expect_error(permuteProteins(values = prot_df, args_fct = args_foo, 
+    expect_error(permuteFeatures(values = prot_df, args_fct = args_foo, 
         contamination = "apoptosis"), "'n_perm' has to be numeric of length 1")
 })
 
@@ -211,7 +211,7 @@ test_that("plotSampleScores works.", {
     expect_is(gg_necroptosis$layers[[1]]$stat, "StatIdentity")
     
     ## boxplot
-    signatures <- readMarkers(type = "apoptosis", fc = 2, n = 1)[, "protein"]
+    signatures <- readMarkers(type = "apoptosis", fc = 2, n = 1)[, "feature"]
     scores <- scoreSamples(values = prot, contamination = "apoptosis", 
         signatures = signatures, n_perm = 10)
     gg <- plotSampleScores(scores = scores)
