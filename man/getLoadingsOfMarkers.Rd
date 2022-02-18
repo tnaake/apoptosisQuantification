@@ -2,31 +2,31 @@
 % Please edit documentation in R/quantifyViaLoadings.R
 \name{getLoadingsOfMarkers}
 \alias{getLoadingsOfMarkers}
-\title{Get PCA loadings of marker proteins}
+\title{Get PCA loadings of marker features}
 \usage{
-getLoadingsOfMarkers(prot, markers)
+getLoadingsOfMarkers(values, markers)
 }
 \arguments{
-\item{prot}{matrix, data.frame, or tibble}
+\item{values}{\code{matrix} or \code{data.frame}}
 
-\item{markers}{tibble}
+\item{markers}{tbl}
 }
 \value{
 tibble
 }
 \description{
 The function \code{getLoadingsOfMarkers} retrieves the loadings of the
-marker proteins (defined by \code{markers}) found in \code{prot}.
+marker features (defined by \code{markers}) of the \code{values} data set.
 
 \code{getLoadingsOfMarkers} returns a \code{tibble} of the marker 
-proteins found in \code{prot} containing the loadings for the principal
+features found in \code{values} containing the loadings for the principal
 components.
 }
 \details{
-In case there are ambiguous/multiple assignments of proteins (containing 
+In case there are ambiguous/multiple assignments of features (containing 
 markers) to a loading value (MaxQuant separates these assignments by ";"), 
-the proteins that are not in \code{markers$protein} are removed.
-In case there are multiple assignments left of marker proteins, the
+the features that are not in \code{markers$feature} are removed.
+In case there are multiple assignments left of marker features, the
 mean value of the loading values are returned.
 }
 \examples{
@@ -40,11 +40,13 @@ f <- system.file("protein_datasets/tanzer2020.RDS",
 se <- readRDS(f)
 prot <- assay(se) |>
     imputeAssay(method = "MinDet")
-getLoadingsOfMarkers(prot = prot, markers = markers)
+apoptosisQuantification:::getLoadingsOfMarkers(values = prot, 
+    markers = markers)
 
 ## "nectroptosis"
 markers <- readMarkers(type = "necroptosis")
-getLoadingsOfMarkers(prot = prot, markers = markers)
+apoptosisQuantification:::getLoadingsOfMarkers(values = prot, 
+    markers = markers)
 }
 \references{
 Tanzer et al. (2020): Quantitative and Dynamic Catalogs of Proteins 
