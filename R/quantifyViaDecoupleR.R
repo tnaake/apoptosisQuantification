@@ -7,18 +7,19 @@
 #' @details 
 #' The parameter \code{values} has to have (gene) symbols as \code{row.names}.
 #' \code{values} can be either a numeric \code{vector}, \code{matrix}, or 
-#' \code{data.frame}. It holds the normalized intensity values of proteins.
+#' \code{data.frame}. It holds the normalized intensity values of features 
+#' (e.g. proteins).
 #' 
 #' The signatures are taken per default from Tanzer et al. (2020), but also 
 #' a \code{tibble} containing the contamination markers can be given to the 
 #' function as argument \code{signatures}. 
 #' In that case the \code{tibble} has to contain at least the 
-#' column \code{"protein"} that contains the marker proteins.  
+#' column \code{"feature"} that contains the marker features (e.g. proteins).  
 #' 
-#' The function will either run \code{decoupleProteins} or 
-#' \code{permuteProteins} to calculate scores. The behaviour will be triggered
+#' The function will either run \code{decoupleFeatures} or 
+#' \code{permuteFeatures} to calculate scores. The behaviour will be triggered
 #' by the presence of the column \code{value} in \code{signatures} (in that 
-#' case, \code{decoupleProteins} is run).
+#' case, \code{decoupleFeatures} is run).
 #' 
 #' @param values numeric \code{vector}, \code{matrix}, or \code{data.frame}
 #' @param contamination \code{character(1)}, either \code{"apoptosis"} or 
@@ -35,7 +36,7 @@
 #' contamination signature (the higher the score, the higher the potential
 #' contamination). If there is no quantitative information on changes 
 #' (e.g. fold changes or t-values), the function will return an empirical
-#' distribution of difference of means of the markers to all proteins in the 
+#' distribution of difference of means of the markers to all features in the 
 #' data set
 #' 
 #' @references
@@ -86,47 +87,47 @@ scoreSamples <- function(values, contamination = c("apoptosis", "necroptosis"),
             values <- scale(values)
 
     ## fix multiple assignments: if there are multiple assignments write only
-    ## one marker protein as prot_names
-    prot_names <- splitNames(protein_names = rownames(values), na.rm = TRUE)
-    ind_markers <- lapply(prot_names, 
-        function(prot_names_i) prot_names_i %in% args_fct[["signatures"]]$protein)
-    prot_names <- lapply(seq_along(prot_names),
+    ## one marker feature as feature_names
+    feature_names <- splitNames(feature_names = rownames(values), na.rm = TRUE)
+    ind_markers <- lapply(feature_names, 
+        function(names_i) names_i %in% args_fct[["signatures"]]$feature)
+    feature_names <- lapply(seq_along(feature_names),
         function(i) {
             ind_i <- which(ind_markers[[i]])
-            if (length(ind_i) > 0) prot_names[[i]][min(ind_i)]
-            else prot_names[[i]][1]
+            if (length(ind_i) > 0) feature_names[[i]][min(ind_i)]
+            else feature_names[[i]][1]
     })
-    prot_names <- unlist(prot_names)
+    feature_names <- unlist(feature_names)
 
     ## convert the matrix to a data.frame, remove duplicated entries
     values <- values |> as.data.frame()
-    prot_names_rem <- prot_names[!duplicated(prot_names)]
-    values <- values[!duplicated(prot_names), ]
-    rownames(values) <- prot_names_rem
+    feature_names_rem <- feature_names[!duplicated(feature_names)]
+    values <- values[!duplicated(feature_names), ]
+    rownames(values) <- feature_names_rem
 
     ## define the arguments for decouple
     if (!("n_perm" %in% names(args_fct))) 
         args_fct[["n_perm"]] <- 1000
 
     ## depening if the column value is present in signatures, either run the
-    ## function decoupleProteins or permuteProteins (otherwise)
+    ## function decoupleFeatures or permuteFeatures (otherwise)
     if ("change" %in% colnames(args_fct[["signatures"]])) {
-        score_values <- decoupleProteins(values = values, args_fct = args_fct,
+        score_values <- decoupleFeatures(values = values, args_fct = args_fct,
             contamination = contamination)
     } else {
-        score_values <- permuteProteins(values = values, args_fct = args_fct,
+        score_values <- permuteFeatures(values = values, args_fct = args_fct,
             contamination = contamination)
     }
 
     score_values
 }
 
-#' @name decoupleProteins
+#' @name decoupleFeatures
 #' 
 #' @title Calculate score values using decoupleR/run_wmean
 #' 
 #' @description 
-#' The function \code{decoupleProteins} calculates contamination scores
+#' The function \code{decoupleFeatures} calculates contamination scores
 #' using the \code{run_wmean} function from the \code{decoupleR}. The 
 #' function will return score values (per sample) that can be interpreted as the 
 #' standard deviations away from an empirical null distribution.
@@ -138,7 +139,7 @@ scoreSamples <- function(values, contamination = c("apoptosis", "necroptosis"),
 #'
 #' The function will be called in \code{scoreSamples}.
 #' 
-#' @param values matrix, the rownames contain the protein names (SYMBOL ids) and
+#' @param values matrix, the rownames contain the feature names (SYMBOL ids) and
 #' colnames the samples
 #' @param args_fct list, containing the entries \code{"n_perm"} 
 #' (\code{numeric(1)} and \code{"signatures"} (\code{tibble})
@@ -163,9 +164,9 @@ scoreSamples <- function(values, contamination = c("apoptosis", "necroptosis"),
 #' args_fct[["n_perm"]] <- 100
 #' 
 #' ## run the function
-#' decoupleProteins(values = prot, args_fct = args_fct, 
+#' decoupleFeatures(values = prot, args_fct = args_fct, 
 #'     contamination = "apoptosis")
-decoupleProteins <- function(values, args_fct, 
+decoupleFeatures <- function(values, args_fct, 
     contamination = c("apoptosis", "necroptosis")) {
     
     contamination <- match.arg(contamination)
@@ -195,7 +196,7 @@ decoupleProteins <- function(values, args_fct,
         
         ## run decoupleR
         means <- decoupleR::run_wmean(mat = as.matrix(sub_values), 
-            network = signatures, .source = "set", .target = "protein", 
+            network = signatures, .source = "set", .target = "feature", 
             .mor = "mor", .likelihood = "likelihood", 
             times = args_fct[["n_perm"]])
         
@@ -215,16 +216,17 @@ decoupleProteins <- function(values, args_fct,
     tibble::tibble(score_tbl)
 }
 
-#' @name permuteProteins
+#' @name permuteFeatures
 #' 
 #' @title Calculate score values by calculating difference between
-#' means of permuted proteins and markers
+#' means of permuted features and markers
 #' 
 #' @description 
-#' The function \code{permuteProteins} calculates the difference between the
-#' mean of marker proteins and random samples of the protein universe 
-#' (proteins in \code{values}). The scores will be a relative quantification
-#' of the marker proteins to the universe protein intensities. Samples that 
+#' The function \code{permuteFeatures} calculates the difference between the
+#' mean of marker features (e.g. proteins) and random samples of the 
+#' feature universe (features in \code{values}). The scores will be a 
+#' relative quantification of the marker features to the universe 
+#' feature intensities. Samples that 
 #' undergo apoptosis (or any other contamination) will have different 
 #' differences than uncontaminated samples.
 #' 
@@ -262,9 +264,9 @@ decoupleProteins <- function(values, args_fct,
 #' args_fct[["n_perm"]] <- 100
 #' 
 #' ## run the function
-#' permuteProteins(values = prot, args_fct = args_fct, 
+#' permuteFeatures(values = prot, args_fct = args_fct, 
 #'     contamination = "apoptosis", seed = 2022)
-permuteProteins <- function(values, args_fct, 
+permuteFeatures <- function(values, args_fct, 
     contamination = c("apoptosis", "necroptosis"), seed = 2022) {
 
     contamination <- match.arg(contamination)
@@ -281,7 +283,7 @@ permuteProteins <- function(values, args_fct,
     signatures <- args_fct[["signatures"]]
 
     ## calculate the means of the markers
-    mean_marker <- apply(values[signatures$protein, ], 2, mean, na.rm = TRUE)
+    mean_marker <- apply(values[signatures$feature, ], 2, mean, na.rm = TRUE)
 
     ## create random numbers and calculate the means for these random draws
     set.seed(seed)
@@ -294,7 +296,7 @@ permuteProteins <- function(values, args_fct,
     })
 
     ## calculate the difference between the markers and the randomly sampled
-    ## proteins
+    ## features
     diff_means_inds <- lapply(means_inds, function(means_inds_i) {
         means_inds_i - mean_marker
     })
@@ -363,9 +365,9 @@ plotSampleScores <- function(scores) {
         stop("column 'set' not in 'scores'")
     
     if (any(duplicated(scores$condition))) {
-        .method <- "permuteProteins"
+        .method <- "permuteFeatures"
     } else {
-        .method <- "decoupleProteins"
+        .method <- "decoupleFeatures"
     }
     
     ## factorize the condition column (used for x-axis)
@@ -377,15 +379,15 @@ plotSampleScores <- function(scores) {
         ggplot2::aes_string(y = "value", x = "condition"))
     
     ## depending on the function that was used to calculate the scores, plot 
-    ## either a barplot (function decoupleProteins)or a boxplot 
-    ## (function permuteProteins)
-    if (.method == "decoupleProteins")
+    ## either a barplot (function decoupleFeatures)or a boxplot 
+    ## (function permuteFeatures)
+    if (.method == "decoupleFeatures")
         g <- g + ggplot2::geom_bar(
             ggplot2::aes_string(fill = "set", col = "set"), 
             position = "dodge", stat = "identity", color="black", ) +
             ggplot2::ylab("s.d. to empirical null distribution")
 
-    if (.method == "permuteProteins")
+    if (.method == "permuteFeatures")
         g <- g + ggplot2::geom_boxplot(ggplot2::aes_string(x = "condition")) + 
             ggplot2::ylab("difference to markers")
 
