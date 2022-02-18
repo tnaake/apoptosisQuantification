@@ -23,14 +23,14 @@
 #' Mitochondrial proteins are defined by the Human Protein Atlas 
 #' (1139 proteins found by searching the Human Protein Atlas database for 
 #' mitochondrial sublocalization). These proteins are matched against the
-#' proteins found in \code{prot}. Currently, two types of ids are 
-#' encoded: either \code{rownames(prot)} have to be "Symbol" or "Ensembl" ids.
+#' proteins found in \code{values}. Currently, two types of ids are 
+#' encoded: either \code{rownames(values)} have to be "Symbol" or "Ensembl" ids.
 #'
 #' @details 
 #' Protein intensities have to in untransformed format such that 
 #' proportions can be calculated as are.
 #'
-#' Protein ids are stored in \code{rownames(prot)}. In case of multiple
+#' Protein ids are stored in \code{rownames(values)}. In case of multiple
 #' assignments the ids are separeted by \code{";"}. In that case, a 
 #' feature will be treated as of mitochondrial origin when there is at least
 #' one mitochondrial protein in the multiple assignment. 
@@ -47,7 +47,7 @@
 #' Thul et al. (2017): A subcellular map of the human proteome.
 #' \emph{Science}, 356, eaal3321. 10.1126/science.aal3321 
 #'
-#' @param prot matrix, data.frame, or tibble
+#' @param values matrix, data.frame, or tibble
 #' @param id character(1), either \code{"Symbol"} or \code{"Ensembl"}
 #'
 #' @return numeric vector
@@ -73,8 +73,8 @@
 #'     "POLG", "RAB38", "NSD3")
 #' rownames(prot)[inds_mito] <- prot_mito
 #' 
-#' calculateProportionOfMitochondrialProteins(prot = prot, id = "Symbol")
-calculateProportionOfMitochondrialProteins <- function(prot, 
+#' calculateProportionOfMitochondrialProteins(values = prot, id = "Symbol")
+calculateProportionOfMitochondrialProteins <- function(values, 
     id = c("Symbol", "Ensembl")) {
     
     id <- match.arg(id)
@@ -89,25 +89,25 @@ calculateProportionOfMitochondrialProteins <- function(prot,
     ## get the ids of the mitochondrial proteins of the database
     protein_mito_id <- mito_proteins[, col_id]
     
-    ## split the names of prot (separated by ";"), remove NAs
-    prot_names <- strsplit(rownames(prot), split = ";")
-    prot_names <- lapply(prot_names, 
-        function(prot_names_i) prot_names_i[prot_names_i != "NA"])
+    ## split the names of values (separated by ";"), remove NAs
+    feature_names <- strsplit(rownames(values), split = ";")
+    feature_names <- lapply(feature_names, 
+        function(names_i) names_i[names_i != "NA"])
 
     ## intersect with the ids from prot
     ## (in case of multiple assignments treat the feature as of mitochondrial
     ## origin if there is at least one mitochondrial protein)
-    protein_mito <- lapply(prot_names, 
-        function(prot_names_i) any(prot_names_i %in% protein_mito_id))
+    protein_mito <- lapply(feature_names, 
+        function(names_i) any(names_i %in% protein_mito_id))
     protein_mito <- unlist(protein_mito)
     
     ## calculate the sum of intensities for mitochondrial and all proteins
-    sum_mito <- prot[protein_mito, , drop = FALSE]
+    sum_mito <- values[protein_mito, , drop = FALSE]
     sum_mito <- apply(sum_mito, 2, sum, na.rm = FALSE)
-    sum_all <- apply(prot, 2, sum, na.rm = FALSE)
+    sum_all <- apply(values, 2, sum, na.rm = FALSE)
     
     ## calculate the proportion and return
-    setNames(sum_mito / sum_all * 100, colnames(prot))
+    setNames(sum_mito / sum_all * 100, colnames(values))
 }
 
 #' @name plotProportionOfMitochondrialProteins
@@ -152,7 +152,7 @@ calculateProportionOfMitochondrialProteins <- function(prot,
 #' prot_mito <- c("MDH2", "OMA1", "NLN", "CS", "OPA1", "CSPG5", "SPATA9", "POLG", "RAB38", "NSD3")
 #' rownames(prot)[inds_mito] <- prot_mito
 #' 
-#' prop_mito <- calculateProportionOfMitochondrialProteins(prot = prot, id = "Symbol")
+#' prop_mito <- calculateProportionOfMitochondrialProteins(values = prot, id = "Symbol")
 #' plotProportionOfMitochondrialProteins(proportion = prop_mito)
 plotProportionOfMitochondrialProteins <- function(proportion) {
     
