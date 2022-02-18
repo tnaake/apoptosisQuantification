@@ -3,7 +3,7 @@
 \name{createLoadingsTbl}
 \alias{createLoadingsTbl}
 \title{Create a tibble containing the loading values for marker and 
-non-marker proteins}
+non-marker features}
 \usage{
 createLoadingsTbl(vals_markers = vals_markers, vals_all = vals_all)
 }
@@ -17,19 +17,19 @@ tibble
 }
 \description{
 The function \code{createLoadingsTbl} creates a tibble containing the loading
-values for marker and non-marker proteins. 
+values for marker and non-marker features. 
 
 \code{createLoadingsTbl} returns a tibble with three columns:
 \itemize{
-    \item \code{protein}: name of protein (in case of multiple assignemt 
-        separated by \code{";"}),
+    \item \code{feature}: name of feature (e.g. protein, in case of multiple
+         assignment separated by \code{";"}),
     \item \code{type}: either \code{"marker"} or \code{non-marker}
 }
 }
 \details{
-In case of multiple assignments of proteins, such a multiple protein is
-treated as a marker protein if there is at least one marker protein
-(defined in \code{names(vals_markers)}) in the multiple assignment.
+In case of multiple assignments of features (e.g. proteins), such a multiple 
+assignment is treated as a marker feature if there is at least one marker 
+feature (defined in \code{names(vals_markers)}) in the multiple assignment.
 }
 \examples{
 library(MatrixQCvis)
@@ -44,8 +44,10 @@ tanzer2020 <- readRDS(f)
 ## get loadings of markers and of the complete data set
 prot <- assay(tanzer2020)
 markers <- readMarkers(type = "apoptosis")
-loadings_markers <- getLoadingsOfMarkers(prot = prot, markers = markers)
+loadings_markers <- apoptosisQuantification:::getLoadingsOfMarkers(
+    values = prot, markers = markers)
 vals_all <- prcomp(t(prot))$rotation[, 1]
-vals_markers <- setNames(loadings_markers$PC1, loadings_markers$protein)
-createLoadingsTbl(vals_markers = vals_markers, vals_all = vals_all)
+vals_markers <- setNames(loadings_markers$PC1, loadings_markers$feature)
+apoptosisQuantification:::createLoadingsTbl(vals_markers = vals_markers, 
+    vals_all = vals_all)
 }
