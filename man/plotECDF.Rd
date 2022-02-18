@@ -4,10 +4,17 @@
 \alias{plotECDF}
 \title{Plot empirical cumulative distribution function of loading values}
 \usage{
-plotECDF(tbl)
+plotECDF(values, markers, PC = "PC1")
 }
 \arguments{
-\item{tbl}{tibble}
+\item{values}{\code{matrix} or \code{data.frame}}
+
+\item{markers}{tbl}
+
+\item{PC}{character, has to be in the format \code{"PC1", "PC2", "PC3", ...},
+the specification of multiple principal components is possible and the
+length of loadings vectors will be calculated using these principal 
+components}
 }
 \value{
 \code{gg}
@@ -34,11 +41,7 @@ tanzer2020 <- readRDS(f)
 ## get loadings of markers and of the complete data set
 prot <- assay(tanzer2020)
 markers <- readMarkers(type = "apoptosis")
-loadings_markers <- getLoadingsOfMarkers(prot = prot, markers = markers)
-vals_all <- prcomp(t(prot))$rotation[, 1]
-vals_markers <- setNames(loadings_markers$PC1, loadings_markers$protein)
-tbl <- createLoadingsTbl(vals_markers = vals_markers, vals_all = vals_all)
 
 ## plot the distribution as ECDF
-plotECDF(tbl)
+plotECDF(values = prot, markers = markers, PC = "PC1")
 }
