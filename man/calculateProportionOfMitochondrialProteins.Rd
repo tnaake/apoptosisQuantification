@@ -4,10 +4,10 @@
 \alias{calculateProportionOfMitochondrialProteins}
 \title{Calculate contribution of mitochondrial proteins}
 \usage{
-calculateProportionOfMitochondrialProteins(prot, id = c("Symbol", "Ensembl"))
+calculateProportionOfMitochondrialProteins(values, id = c("Symbol", "Ensembl"))
 }
 \arguments{
-\item{prot}{matrix, data.frame, or tibble}
+\item{values}{matrix, data.frame, or tibble}
 
 \item{id}{character(1), either \code{"Symbol"} or \code{"Ensembl"}}
 }
@@ -35,14 +35,14 @@ returns the proportions in percent.
 Mitochondrial proteins are defined by the Human Protein Atlas 
 (1139 proteins found by searching the Human Protein Atlas database for 
 mitochondrial sublocalization). These proteins are matched against the
-proteins found in \code{prot}. Currently, two types of ids are 
-encoded: either \code{rownames(prot)} have to be "Symbol" or "Ensembl" ids.
+proteins found in \code{values}. Currently, two types of ids are 
+encoded: either \code{rownames(values)} have to be "Symbol" or "Ensembl" ids.
 }
 \details{
 Protein intensities have to in untransformed format such that 
 proportions can be calculated as are.
 
-Protein ids are stored in \code{rownames(prot)}. In case of multiple
+Protein ids are stored in \code{rownames(values)}. In case of multiple
 assignments the ids are separeted by \code{";"}. In that case, a 
 feature will be treated as of mitochondrial origin when there is at least
 one mitochondrial protein in the multiple assignment.
@@ -64,7 +64,7 @@ prot_mito <- c("MDH2", "OMA1", "NLN", "CS", "OPA1", "CSPG5", "SPATA9",
     "POLG", "RAB38", "NSD3")
 rownames(prot)[inds_mito] <- prot_mito
 
-calculateProportionOfMitochondrialProteins(prot = prot, id = "Symbol")
+calculateProportionOfMitochondrialProteins(values = prot, id = "Symbol")
 }
 \references{
 The Human Protein Atlas 
