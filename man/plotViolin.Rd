@@ -4,10 +4,17 @@
 \alias{plotViolin}
 \title{Plot the distribution of loading values via a violin plot}
 \usage{
-plotViolin(tbl)
+plotViolin(values, markers, PC = "PC1")
 }
 \arguments{
-\item{tbl}{tibble}
+\item{values}{\code{matrix} or \code{data.frame}}
+
+\item{markers}{tbl}
+
+\item{PC}{character, has to be in the format \code{"PC1", "PC2", "PC3", ...},
+the specification of multiple principal components is possible and the
+length of loadings vectors will be calculated using these principal 
+components}
 }
 \value{
 \code{gg}
@@ -32,12 +39,8 @@ f <- system.file("protein_datasets/tanzer2020.RDS",
 tanzer2020 <- readRDS(f)
 
 ## get loadings of markers and of the complete data set
-prot <- assay(tanzer2020)
+values <- assay(tanzer2020)
 markers <- readMarkers(type = "apoptosis", fc = 2, n = 1)
-loadings_markers <- getLoadingsOfMarkers(values = prot, markers = markers)
-vals_all <- prcomp(t(prot))$rotation[, 2]
-vals_markers <- setNames(loadings_markers$PC2, loadings_markers$feature)
-tbl <- createLoadingsTbl(vals_markers = vals_markers, vals_all = vals_all)
 
-plotViolin(tbl)
+plotViolin(values = values, markers = markers, PC = "PC1")
 }
