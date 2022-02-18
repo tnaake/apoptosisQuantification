@@ -15,6 +15,7 @@ Depends:
 	dplyr (>= 1.0.7),
 	ggplot2 (>= 3.3.5),
 	methods (>= 4.1.0),
+	plotly (>= 4.10.0),
 	R (>= 4.1.0),
 	stats (>= 4.1.0),
 	tibble (>= 3.1.6),
