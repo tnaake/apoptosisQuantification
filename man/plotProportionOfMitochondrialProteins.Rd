@@ -40,6 +40,6 @@ inds_mito <- sample(seq_len(nrow(prot)), 10)
 prot_mito <- c("MDH2", "OMA1", "NLN", "CS", "OPA1", "CSPG5", "SPATA9", "POLG", "RAB38", "NSD3")
 rownames(prot)[inds_mito] <- prot_mito
 
-prop_mito <- calculateProportionOfMitochondrialProteins(prot = prot, id = "Symbol")
+prop_mito <- calculateProportionOfMitochondrialProteins(values = prot, id = "Symbol")
 plotProportionOfMitochondrialProteins(proportion = prop_mito)
 }
