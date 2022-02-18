@@ -53,9 +53,12 @@ f <- system.file("protein_datasets/tanzer2020.RDS",
     package = "apoptosisQuantification")
 se <- readRDS(f)
 prot <- assay(se)
+
 loadings <- prcomp(t(prot))$rotation |> 
     as.data.frame() |>
-    rownames_to_column(var = "protein") |> 
+    rownames_to_column(var = "feature") |> 
     as_tibble()
-combineLoadings(loadings = loadings, PC = c("PC1", "PC2")) 
+
+apoptosisQuantification:::combineLoadings(loadings = loadings, 
+    PC = c("PC1", "PC2")) 
 }
